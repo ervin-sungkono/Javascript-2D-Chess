@@ -1,0 +1,158 @@
+:root{
+    --black: #5B5B5B;
+    --white: #F5F5F5;
+    --text: #1B1B1B;
+}
+
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body{
+    min-height: 100vh;
+    background-color: var(--white);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-family: sans-serif;
+}
+
+#game-wrapper{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+#game-board{
+    display: grid;
+    grid-template-columns: repeat(8,1fr);
+    grid-template-rows: repeat(8,1fr);
+    border: 2px solid var(--black);
+    box-shadow: 6px 16px 32px rgba(0,0,0,0.15);
+}
+
+#game-board .board{
+    width: 7.5vmin;
+    height: 7.5vmin;
+    position: relative;
+}
+
+#game-board .board > img{
+    z-index: 999;
+    cursor: pointer;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+#game-board .board.green::after{
+    cursor: pointer;
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgb(77, 202, 77);
+    opacity: 0.15;
+    animation: glow 2s linear infinite;
+}
+
+#game-board .board.clicked{
+    border: 2px solid rgb(77, 202, 77) !important;
+}
+
+#game-board .board.red:not(.green)::after{
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgb(210, 64, 64);
+    opacity: 0.15;
+    animation: glow 2s linear infinite;
+}
+
+@keyframes glow{
+    50%{
+        opacity: 0.4;
+    }
+}
+
+#game-board .board.black{
+    background-color: var(--black);
+}
+
+#game-board .board.white{
+    background-color: var(--white);
+}
+
+.cemetery{
+    min-height: 24px;
+    display: flex;
+    width: 100%;
+}
+
+.cemetery > img{
+    width: 24px;
+    height: 24px;
+}
+
+#black-cemetery{
+    justify-content: flex-start;
+}
+
+#white-cemetery{
+    justify-content: flex-end;
+}
+
+#turn-sign{
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--text);
+    margin-top: 0.75rem;
+}
+
+#position-tracker{
+    resize: none;
+    width: 60vmin;
+    margin-top: 1.5rem;
+    padding: 1rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    outline: none;
+    background-color: var(--text);
+    color: var(--white);
+    text-align: center;
+}
+
+@media all and (max-width: 1024px){
+    #game-board .board{
+        width: 11vmin;
+        height: 11vmin;
+        position: relative;
+    }
+
+    #position-tracker{
+        width: 88vmin;
+    }
+
+    #turn-sign{
+        font-size: 1.25rem;
+    }
+}
+
+@media all and (max-width: 480px){
+    .cemetery > img{
+        width: 20px;
+        height: 20px;
+    }
+}
