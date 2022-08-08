@@ -110,7 +110,7 @@ class Game{
 				if (this.checked){
 					if(this.isCheckmate(this.turn)) this.gameover(clickedPiece.color);
                     else{
-                        this.tracker.innerHTML += `${this.turn} Checked!`
+                        this.tracker.innerHTML += `${this.turn} Checked!\n`
                     }
 				}
 			}
@@ -173,13 +173,13 @@ class Game{
 		if (rook1 && rook1.castling) {
 			const castlingPosition = rook1.position + 2;
             const leftMoves = this.clickedPiece.getLeftMove(3);
-            if(leftMoves.length === 3 && this.kingCanMove(castlingPosition))
+            if(leftMoves.length === 3 && leftMoves.slice(0,2).forEach((move) => this.kingCanMove(move)))
 			allowedMoves.push(castlingPosition);
 		}
 		if (rook2 && rook2.castling) {
 			const castlingPosition = rook2.position - 1;
             const rightMoves = this.clickedPiece.getRightMove(2);
-            if(rightMoves.length === 2 && this.kingCanMove(castlingPosition))
+            if(rightMoves.length === 2 && rightMoves.forEach((move) => this.kingCanMove(move)))
 			allowedMoves.push(castlingPosition);
 		}
 		return allowedMoves;
@@ -197,28 +197,27 @@ class Game{
 		this.changeTurn();
 	}
 
-    kingCanMove(position, kill = true){
+    kingCanMove(position){
         const piece = this.clickedPiece;
-        console.log(this.clickedPiece)
 		const originalPosition = piece.position;
 		const otherPiece = this.findPieceByPosition(position);
-		const can_kill = kill && (otherPiece || false) && otherPiece.name != 'king';
+		const can_kill = otherPiece && (otherPiece.name != 'king');
         piece.position = position;
-        if (can_kill) this.pieces.splice(this.pieces.indexOf(otherPiece), 1);  
-        const isChecked = this.isChecked(piece.color);
+        if (can_kill) this.pieces.splice(this.pieces.indexOf(otherPiece), 1); 
+        const isChecked = this.isChecked(piece.color, false);
 		if(can_kill) this.pieces.push(otherPiece);
 		piece.position = originalPosition;
 		return !isChecked;
     }
 
-    isChecked(turn) {
+    isChecked(turn, warning = true) {
         const checkedBoard = _class('red');
         if(!this.checked)
         Array.from(checkedBoard).forEach((board) => {
             board.classList.remove('red');
         });
 		const king = this.findPiecesByName(turn,'king')[0];
-		const enemyColor = (turn === 'White') ? 'black' : 'white';
+		const enemyColor = (turn.toLowerCase() === 'white') ? 'black' : 'white';
 		const enemyPieces = this.findPiecesByColor(enemyColor);
         let isChecked = false;
         enemyPieces.forEach((enemyPiece) => {
@@ -226,15 +225,19 @@ class Game{
             if(Array.isArray(allowedMoves[0])){
                 allowedMoves.forEach((moves) => {
                     if(moves.includes(king.position)){
-                        moves.forEach((move) => this.boardCells[move].classList.add('red'));
-                        this.boardCells[enemyPiece.position].classList.add('red');
+                        if(warning){
+                            moves.forEach((move) => this.boardCells[move].classList.add('red'));
+                            this.boardCells[enemyPiece.position].classList.add('red');
+                        }
                         isChecked = true;
                     }
                 })
             }
             else if(allowedMoves.includes(king.position)){
-                allowedMoves.forEach((move) => this.boardCells[move].classList.add('red'));
-                this.boardCells[enemyPiece.position].classList.add('red');
+                if(warning){
+                    allowedMoves.forEach((move) => this.boardCells[move].classList.add('red'));
+                    this.boardCells[enemyPiece.position].classList.add('red');
+                }
                 isChecked = true;
             };
         });
@@ -260,7 +263,7 @@ class Game{
         this.tracker.innerHTML += `${winner} Wins!`;
         let i = 0;
         let timeout = () => {
-            this.tracker.innerHTML += `Starting new game in ${(interval - i)/1000} seconds`;
+            this.tracker.innerHTML += `Starting new game in ${(interval - i)/1000} seconds\n`;
             if(i < interval){
                 setTimeout(timeout, 1000);
                 i += 1000;
