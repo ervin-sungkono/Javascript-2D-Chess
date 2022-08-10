@@ -77,8 +77,8 @@ class Game{
         this.turnSign.innerHTML = `${this.turn}'s Turn`;
     }
 
-    pieceMove(e){
-        const piecePosition = e.target.parentNode.getAttribute('id');
+    pieceMove(e, position = null){
+        const piecePosition = position || e.target.parentNode.getAttribute('id');
         const piece = this.findPieceByPosition(piecePosition);
         const allowedMoves = this.getAllowedMoves(e,piece);
         if(allowedMoves){
@@ -108,11 +108,13 @@ class Game{
                 this.changeTurn();
                 this.checked = this.isChecked(this.turn);
 				if (this.checked){
-					if(this.isCheckmate(this.turn)) this.gameover(clickedPiece.color);
+					if(this.isMate(this.turn)) this.gameover(clickedPiece.color);
                     else{
                         this.tracker.innerHTML += `${this.turn} Checked!\n`
                     }
-				}
+				}else if(this.isMate(this.turn)){
+                    this.draw(this.turn);
+                }
 			}
 			else{
 				return 0;
@@ -125,7 +127,7 @@ class Game{
 		if(this.turn.toLowerCase() === piece.color.toLowerCase()){
 			this.clearBoard();
 			this.clickedPiece = piece;
-			if (e.type === 'dragstart') {
+			if (e != null && e.type === 'dragstart') {
 				e.dataTransfer.setData("text", e.target.id);
 			}
 
@@ -235,7 +237,7 @@ class Game{
             }
             else if(allowedMoves.includes(king.position)){
                 if(warning){
-                    allowedMoves.forEach((move) => this.boardCells[move].classList.add('red'));
+                    this.boardCells[king.position].classList.add('red');
                     this.boardCells[enemyPiece.position].classList.add('red');
                 }
                 isChecked = true;
@@ -244,23 +246,32 @@ class Game{
 		return isChecked;
 	}
 
-    isCheckmate(turn){
+    isMate(turn){
         const color = turn.toLowerCase();
         const pieces = this.findPiecesByColor(color);
-        let isCheckmate = true;
+        let isMate = true;
         pieces.forEach((piece) => {
             this.clickedPiece = piece;
             const allowedMoves = this.getUnblockedMoves(piece.getPossibleMove().reduce((moves, move) => moves.concat(move),[]),piece.name);
-            if(allowedMoves.length > 0) isCheckmate = false;
+            if(allowedMoves.length > 0) isMate = false;
         });
 		this.clickedPiece = null;
-		return isCheckmate;
+		return isMate;
     }
 
     gameover(color){
-        const interval = 5000;
         const winner = color.charAt(0).toUpperCase() + color.substring(1);
         this.tracker.innerHTML += `${winner} Wins!`;
+        this.newGame();
+    }
+
+    draw(turn){
+        this.tracker.innerHTML = `${turn} can no longer move!, game ends in stalemate.`;
+        this.newGame();
+    }
+
+    newGame(){
+        const interval = 5000;
         let i = 0;
         let timeout = () => {
             this.tracker.innerHTML += `Starting new game in ${(interval - i)/1000} seconds\n`;
