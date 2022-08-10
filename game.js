@@ -136,7 +136,7 @@ class Game{
 				possibleMoves = this.getCastlingPositions(possibleMoves);
                 possibleMoves = possibleMoves.filter((move) => this.kingCanMove(move));
 			}
-            if(this.checked) this.allowedMoves = this.getUnblockedMoves(possibleMoves, piece.name);
+            if(this.checked) this.allowedMoves = this.getUnblockedMoves(possibleMoves);
             else {
                 possibleMoves = possibleMoves.filter((move) => this.kingCanMove(move));
                 this.allowedMoves = possibleMoves;
@@ -150,22 +150,8 @@ class Game{
         return null;
     }
 
-    getUnblockedMoves(allowedMoves, pieceName){
-        if(pieceName != 'king'){
-            const unblockedPositions = Array.from(_class('red')).map((position => parseInt(position.getAttribute('id'))));
-            return allowedMoves.filter((move) => unblockedPositions.includes(move) && this.kingCanMove(move));
-        }
-        else{
-            const enemyColor = this.turn === 'White' ? 'black' : 'white';
-            const enemyPieces = this.findPiecesByColor(enemyColor);
-            let blockedPositions = [];
-            enemyPieces.forEach(enemyPiece => {
-                const allowedMoves = enemyPiece.getPossibleMove().reduce((moves, move) => moves.concat(move),[]);
-                blockedPositions.push(allowedMoves);
-            });
-            blockedPositions = blockedPositions.reduce((moves, move) => moves.concat(move),[])
-            return allowedMoves.filter((move) => !blockedPositions.includes(move) && this.kingCanMove(move));
-        }
+    getUnblockedMoves(allowedMoves){
+        return allowedMoves.filter((move) => this.kingCanMove(move));
     }
 
     getCastlingPositions(allowedMoves) {
@@ -252,7 +238,8 @@ class Game{
         let isMate = true;
         pieces.forEach((piece) => {
             this.clickedPiece = piece;
-            const allowedMoves = this.getUnblockedMoves(piece.getPossibleMove().reduce((moves, move) => moves.concat(move),[]),piece.name);
+            const allowedMoves = this.getUnblockedMoves(piece.getPossibleMove().reduce((moves, move) => moves.concat(move),[]));
+            console.log(allowedMoves);
             if(allowedMoves.length > 0) isMate = false;
         });
 		this.clickedPiece = null;
@@ -266,8 +253,8 @@ class Game{
     }
 
     draw(turn){
-        this.tracker.innerHTML = `${turn} can no longer move!, game ends in stalemate.`;
-        this.newGame();
+        this.tracker.innerHTML += `${turn} can no longer move!, game ends in stalemate.\n`;
+        // this.newGame();
     }
 
     newGame(){
@@ -280,6 +267,7 @@ class Game{
                 i += 1000;
             }
         }
+        timeout();
         setTimeout(() => location.reload(), interval);
     }
 
