@@ -248,13 +248,13 @@ class Game{
 
     gameover(color){
         const winner = color.charAt(0).toUpperCase() + color.substring(1);
-        this.tracker.innerHTML += `${winner} Wins!`;
+        this.tracker.innerHTML += `${winner} Wins!\n`;
         this.newGame();
     }
 
     draw(turn){
         this.tracker.innerHTML += `${turn} can no longer move!, game ends in stalemate.\n`;
-        // this.newGame();
+        this.newGame();
     }
 
     newGame(){
